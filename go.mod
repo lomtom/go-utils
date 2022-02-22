@@ -1,3 +1,3 @@
-module github.com/zero028/go-utils
+module github.com/zero028/go-util
 
 go 1.17
