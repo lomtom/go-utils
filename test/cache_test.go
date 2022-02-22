@@ -1,7 +1,7 @@
 package test
 
 import (
-	"go-utils/cache"
+	"github.com/zero028/go-utils/cache"
 	"log"
 	"testing"
 )
