@@ -18,8 +18,8 @@ type Map struct {
 	isGc       bool
 }
 
-// NewCache 新建缓存
-func NewCache(opts ...CreateOptionFunc) MapInterface {
+// NewMapCache 新建缓存
+func NewMapCache(opts ...CreateOptionFunc) MapInterface {
 	exp := newExpirationPolicy()
 	for _, opt := range opts {
 		opt(&exp)
