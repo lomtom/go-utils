@@ -100,7 +100,7 @@ func (c *Map) generateExpiration() int64 {
 	if c.expiration == DefaultExpiration {
 		return 0
 	}
-	return time.Now().Add(c.expiration).UnixMicro()
+	return time.Now().Add(c.expiration).UnixNano() / 1e3
 }
 
 // 初始化数据
@@ -195,7 +195,7 @@ func (c *Map) GetAndExpired(key string) (interface{}, bool) {
 		return nil, false
 	}
 	// 过期
-	c.set(key, value, time.Now().UnixMicro())
+	c.set(key, value, time.Now().UnixNano()/1e3)
 	return value.object, true
 }
 

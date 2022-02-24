@@ -24,7 +24,7 @@ type timerOption struct {
 func newTimerOption() timerOption {
 	return timerOption{
 		option{
-			fmt.Sprintf("%v_%v", defaultName, time.Now().UnixMicro()),
+			fmt.Sprintf("%v_%v", defaultName, time.Now().UnixNano()/1e3),
 			nil,
 		},
 		defaultInterval,

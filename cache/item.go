@@ -14,10 +14,10 @@ func (item *item) expired() bool {
 	if item.expiration == 0 {
 		return false
 	}
-	return time.Now().UnixMicro() > item.expiration
+	return time.Now().UnixNano()/1e3 > item.expiration
 }
 
 // 设置过期，将会在下个清理缓存的周期进行清除
 func (item *item) setExpired() {
-	item.expiration = time.Now().UnixMicro()
+	item.expiration = time.Now().UnixNano() / 1e3
 }
