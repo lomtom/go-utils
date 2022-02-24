@@ -62,7 +62,7 @@ func (c *Map) StopGc() error {
 }
 
 // StartGc 重新gc
-// 设置过期时间时，会自动开启gc，无需手动gc
+// 设置过期时间后，会自动开启gc，无需手动gc
 func (c *Map) StartGc() error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -131,6 +131,7 @@ func (c *Map) DeleteExpired() {
 	}
 }
 
+// Delete 删除数据
 func (c *Map) Delete(key string) (interface{}, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -142,6 +143,7 @@ func (c *Map) Delete(key string) (interface{}, bool) {
 	return nil, ok
 }
 
+// Set 添加/修改数据，将会覆盖
 func (c *Map) Set(key string, value interface{}) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -150,7 +152,8 @@ func (c *Map) Set(key string, value interface{}) {
 	c.set(key, value, c.generateExpiration())
 }
 
-// Add 如需覆盖添加，请使用Set方法
+// Add 添加数据，若有相同
+// 如需覆盖添加，请使用Set方法
 func (c *Map) Add(key string, value interface{}) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -163,7 +166,8 @@ func (c *Map) Add(key string, value interface{}) error {
 	return nil
 }
 
-// Get 不存在或过期都会返回不存在
+// Get 获取数据
+// 不存在或过期都会返回不存在
 // 返回数据、是否存在
 func (c *Map) Get(key string) (interface{}, bool) {
 	c.mu.Lock()
@@ -175,6 +179,7 @@ func (c *Map) Get(key string) (interface{}, bool) {
 	return value.object, true
 }
 
+// GetAndDelete 获取数据并删除
 func (c *Map) GetAndDelete(key string) (interface{}, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -187,6 +192,8 @@ func (c *Map) GetAndDelete(key string) (interface{}, bool) {
 	return value.object, true
 }
 
+// GetAndExpired  获取数据并过期
+// 将在下一次清除时删除，若未开启清除能力，将永远不会删除
 func (c *Map) GetAndExpired(key string) (interface{}, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -199,6 +206,7 @@ func (c *Map) GetAndExpired(key string) (interface{}, bool) {
 	return value.object, true
 }
 
+// Clear 清除所有数据
 func (c *Map) Clear() {
 	c.items = make(map[string]item)
 }

@@ -87,6 +87,7 @@ func (j *timerJob) validate() error {
 	return nil
 }
 
+// Start 开启任务
 func (j *timerJob) Start() error {
 	err := j.validate()
 	if err != nil {
@@ -111,7 +112,6 @@ func (j *timerJob) Start() error {
 }
 
 // Stop 停止任务
-// 如果已经停止，将直接返回
 func (j *timerJob) Stop() error {
 	// 如果已经停止，跳过
 	if !j.isStart {
@@ -123,10 +123,12 @@ func (j *timerJob) Stop() error {
 	return nil
 }
 
+// GetParam 获取参数
 func (j *timerJob) GetParam() map[string]interface{} {
 	return j.params
 }
 
+// SetParam 设置参数
 func (j *timerJob) SetParam(params map[string]interface{}) error {
 	j.params = params
 	return nil

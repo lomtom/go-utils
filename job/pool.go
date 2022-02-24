@@ -48,6 +48,7 @@ func (p *pool) add(name string, j TimerJobInterface) {
 	log.Printf("%v 任务注册成功 ", j.getName())
 }
 
+// StartAll 开启全部任务
 func (p *pool) StartAll() error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
@@ -63,6 +64,7 @@ func (p *pool) StartAll() error {
 	return nil
 }
 
+// StopAll 停止全部任务
 func (p *pool) StopAll() error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
@@ -72,6 +74,7 @@ func (p *pool) StopAll() error {
 	return nil
 }
 
+// StopJob 停止某一个任务
 func (p *pool) StopJob(j TimerJobInterface) error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
@@ -82,6 +85,18 @@ func (p *pool) StopJob(j TimerJobInterface) error {
 	return j.Stop()
 }
 
+// StopJobByName 停止某一个任务（通过名字）
+func (p *pool) StopJobByName(name string) error {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	j, err := p.get(name)
+	if err != nil {
+		return err
+	}
+	return j.Stop()
+}
+
+// StartJob 开启某一任务
 func (p *pool) StartJob(j TimerJobInterface) error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
@@ -92,7 +107,18 @@ func (p *pool) StartJob(j TimerJobInterface) error {
 	return j.Start()
 }
 
-// Put 放入任务(会立即启动)
+// StartJobByName  开启某一任务（通过名字）
+func (p *pool) StartJobByName(name string) error {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	j, err := p.get(name)
+	if err != nil {
+		return err
+	}
+	return j.Start()
+}
+
+// Add 放入任务(会立即启动)
 // 如果名字一样，将会返回错误
 func (p *pool) Add(j TimerJobInterface) error {
 	p.lock.Lock()
@@ -106,6 +132,7 @@ func (p *pool) Add(j TimerJobInterface) error {
 	return exist
 }
 
+// Remove 移除任务
 func (p *pool) Remove(j TimerJobInterface) error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
