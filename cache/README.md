@@ -7,28 +7,8 @@
 - 可手动清除全部缓存
 - ...
 
-使用
+接口
 ---
-**引用**
-```go
-import "github.com/zero028/go-utils/cache"
-```
-
-**示例**
-```go
-func Test(t *testing.T) {{
-    c := cache.NewMapCache()
-    c.Set("1", 1)
-    fmt.Println(c.Get("1"))
-}
-```
-**输出**
-```shell
-1 true
-```
-
-
-**其他方法**
 ```go
 
 // IsExpired 判断是否过期
@@ -62,3 +42,24 @@ Add(key string, value interface{}) error
 // Clear 清除所有数据
 Clear()
 ```
+
+使用
+---
+**引用**
+```go
+import "github.com/zero028/go-utils/cache"
+```
+
+**示例**
+```go
+func Test(t *testing.T) {{
+    c := cache.NewMapCache()
+    c.Set("1", 1)
+    fmt.Println(c.Get("1"))
+}
+```
+**输出**
+```shell
+1 true
+```
+
