@@ -21,6 +21,7 @@ import "github.com/zero028/go-utils/job"
 ```
 
 **示例**
+
 示例一：使用定时任务
 ```go
 func Test(t *testing.T) {
@@ -96,7 +97,7 @@ func TestTimer(t *testing.T) {
 }
 ```
 
-**输出**
+输出
 ```shell
 2022/02/24 16:45:41 job_1645692341457023 第1次  开始执行任务
 2022/02/24 16:45:43 job_1645692341457023 第1次  执行时任务 start....
@@ -189,4 +190,39 @@ func TestPool1(t *testing.T) {
 	}
 	time.Sleep(time.Minute)
 }
+```
+
+任务接口：
+```go
+// GetParam 获取参数
+GetParam() map[string]interface{}
+// SetParam 设置参数
+SetParam(params map[string]interface{}) error
+
+
+// Start 开启任务
+Start() error
+// Stop 停止任务
+Stop() error
+```
+
+任务池接口：
+```go
+// StartAll 开启全部任务
+StartAll() error
+// StopAll 停止全部任务
+StopAll() error
+// StopJob 停止某一个任务
+StopJob(j TimerJobInterface) error
+// StopJobByName 停止某一个任务（通过名字）
+StopJobByName(name string) error
+// StartJob 开启某一任务
+StartJob(j TimerJobInterface) error
+// StartJobByName  开启某一任务（通过名字）
+StartJobByName(name string) error
+// Add 放入任务(会立即启动)
+// 如果名字一样，将会返回错误
+Add(j TimerJobInterface) error
+// Remove 移除任务
+Remove(j TimerJobInterface) error
 ```

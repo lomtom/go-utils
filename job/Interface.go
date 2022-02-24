@@ -1,5 +1,6 @@
 package job
 
+// TimerJob 定时任务内可用
 type TimerJob interface {
 	// GetParam 获取参数
 	GetParam() map[string]interface{}
