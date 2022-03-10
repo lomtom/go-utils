@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"sync"
 	"time"
 )
 
@@ -31,10 +32,14 @@ type timerJob struct {
 	startCount int64
 	// 是否启动
 	isStart bool
+	// mu
+	mu sync.Mutex
 }
 
 func jobRealAction(jobFunc2 jobFunc) jobAction {
 	return func(j *timerJob) {
+		j.mu.Lock()
+		defer j.mu.Unlock()
 		j.countIncrease()
 		log.Printf("%v 第%v次  执行时任务 start....", j.getName(), j.getCount())
 		jobFunc2(j)
@@ -56,6 +61,7 @@ func NewTimerJob(jf jobFunc, opts ...CreateOptionFunc) TimerJobInterface {
 		name:      createOption.name,
 		interval:  createOption.interval,
 		id:        time.Now().Format("2006-01-02 15:04:05"),
+		mu:        sync.Mutex{},
 	}
 }
 
