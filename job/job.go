@@ -114,6 +114,8 @@ func (j *timerJob) Start() error {
 			}
 		}
 	}()
+	// 开启后，立马触发一次任务
+	j.jf(j)
 	return nil
 }
 
