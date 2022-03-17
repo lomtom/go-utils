@@ -104,6 +104,8 @@ func (j *timerJob) Start() error {
 	ticker := time.NewTicker(j.interval)
 	log.Printf("%v 第%v次  开始执行任务", j.name, j.count+1)
 	go func() {
+		// 开启后，立马触发一次任务
+		j.jf(j)
 		for {
 			select {
 			case <-ticker.C:
@@ -114,8 +116,6 @@ func (j *timerJob) Start() error {
 			}
 		}
 	}()
-	// 开启后，立马触发一次任务
-	j.jf(j)
 	return nil
 }
 
