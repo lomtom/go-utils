@@ -34,6 +34,8 @@ type timerJob struct {
 	isStart bool
 	// mu
 	mu sync.Mutex
+	// log
+	log int
 }
 
 func jobRealAction(jobFunc2 jobFunc) jobAction {
@@ -41,9 +43,13 @@ func jobRealAction(jobFunc2 jobFunc) jobAction {
 		j.mu.Lock()
 		defer j.mu.Unlock()
 		j.countIncrease()
-		log.Printf("%v 第%v次  执行时任务 start....", j.getName(), j.getCount())
+		if j.log >= Debug {
+			log.Printf("%v 第%v次  执行时任务 start....", j.getName(), j.getCount())
+		}
 		jobFunc2(j)
-		log.Printf("%v 第%v次  执行时任务 end....", j.getName(), j.getCount())
+		if j.log >= Debug {
+			log.Printf("%v 第%v次  执行时任务 end....", j.getName(), j.getCount())
+		}
 	}
 }
 
@@ -62,6 +68,7 @@ func NewTimerJob(jf jobFunc, opts ...CreateOptionFunc) TimerJobInterface {
 		interval:  createOption.interval,
 		id:        time.Now().Format("2006-01-02 15:04:05"),
 		mu:        sync.Mutex{},
+		log:       createOption.logLevel,
 	}
 }
 
@@ -102,7 +109,9 @@ func (j *timerJob) Start() error {
 	j.startCount++
 	j.isStart = true
 	ticker := time.NewTicker(j.interval)
-	log.Printf("%v 第%v次  开始执行任务", j.name, j.count+1)
+	if j.log >= Debug {
+		log.Printf("%v 第%v次  开始执行任务", j.name, j.count+1)
+	}
 	go func() {
 		// 开启后，立马触发一次任务
 		j.jf(j)
@@ -126,7 +135,9 @@ func (j *timerJob) Stop() error {
 		return errors.New(fmt.Sprintf("任务 %s 已经停止", j.name))
 	}
 	j.isStart = false
-	log.Printf("%v 第%v次  停止执行任务", j.name, j.count)
+	if j.log >= Release {
+		log.Printf("%v 第%v次  停止执行任务", j.name, j.count)
+	}
 	j.stopTimer <- 1
 	return nil
 }

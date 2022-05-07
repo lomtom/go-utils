@@ -11,9 +11,16 @@ const (
 	defaultInterval = time.Minute
 )
 
+const (
+	None int = iota
+	Release
+	Debug
+)
+
 type option struct {
-	name   string
-	params map[string]interface{}
+	name     string
+	params   map[string]interface{}
+	logLevel int
 }
 
 type timerOption struct {
@@ -26,6 +33,7 @@ func newTimerOption() timerOption {
 		option{
 			fmt.Sprintf("%v_%v", defaultName, time.Now().UnixNano()/1e3),
 			nil,
+			0,
 		},
 		defaultInterval,
 	}
@@ -58,5 +66,11 @@ func SetDuration(interval time.Duration) CreateOptionFunc {
 func SetParam(param map[string]interface{}) CreateOptionFunc {
 	return func(o *timerOption) {
 		o.params = param
+	}
+}
+
+func SetLogLevel(logLevel int) CreateOptionFunc {
+	return func(o *timerOption) {
+		o.logLevel = logLevel
 	}
 }

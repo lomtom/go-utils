@@ -2,7 +2,6 @@ package job
 
 import (
 	"errors"
-	"log"
 	"sync"
 )
 
@@ -45,7 +44,6 @@ func (p *pool) get(name string) (TimerJobInterface, error) {
 // 保证线程安全访问map
 func (p *pool) add(name string, j TimerJobInterface) {
 	p.jobs[name] = j
-	log.Printf("%v 任务注册成功 ", j.getName())
 }
 
 // StartAll 开启全部任务
