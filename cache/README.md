@@ -47,7 +47,7 @@ Clear()
 ---
 **引用**
 ```go
-import "github.com/zero028/go-utils/cache"
+import "github.com/lomtom/go-utils/cache"
 ```
 
 **示例**

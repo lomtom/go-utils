@@ -6,7 +6,7 @@ go工具包 ⚗️
 安装 ⚒️
 ---
 ```shell
-go get github.com/zero028/go-utils
+go get github.com/lomtom/go-utils
 ```
 
 使用 

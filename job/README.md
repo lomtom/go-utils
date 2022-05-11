@@ -56,7 +56,7 @@ Remove(j TimerJobInterface) error
 ---
 **引用**
 ```go
-import "github.com/zero028/go-utils/job"
+import "github.com/lomtom/go-utils/job"
 ```
 
 **示例**
