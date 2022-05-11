@@ -2,7 +2,7 @@ package test
 
 import (
 	"fmt"
-	"github.com/zero028/go-utils/cache"
+	"github.com/lomtom/go-utils/cache"
 	"testing"
 )
 

@@ -1,3 +1,3 @@
-module github.com/zero028/go-utils
+module github.com/lomtom/go-utils
 
 go 1.16

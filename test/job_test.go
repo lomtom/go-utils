@@ -2,7 +2,7 @@ package test
 
 import (
 	"fmt"
-	"github.com/zero028/go-utils/job"
+	"github.com/lomtom/go-utils/job"
 	"testing"
 	"time"
 )
@@ -60,11 +60,11 @@ func TestTimer(t *testing.T) {
 	time.Sleep(time.Minute)
 }
 
-func Job1(j job.TimerJob) {
+func Job1(job.TimerJob) {
 	fmt.Println("job1")
 }
 
-func Job2(j job.TimerJob) {
+func Job2(job.TimerJob) {
 	fmt.Println("job2")
 }
 
