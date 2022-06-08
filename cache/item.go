@@ -2,14 +2,12 @@ package cache
 
 import "time"
 
-/******************************************* 数据 *******************************************/
-
 type item struct {
-	object     interface{} // 数据
-	expiration int64       // 过期时间
+	object     interface{} // data
+	expiration int64       // expiration time
 }
 
-// Expired 判断数据项是否已经过期
+// judge whether data is expired
 func (item *item) expired() bool {
 	if item.expiration == 0 {
 		return false
@@ -17,7 +15,7 @@ func (item *item) expired() bool {
 	return time.Now().UnixNano()/1e3 > item.expiration
 }
 
-// 设置过期，将会在下个清理缓存的周期进行清除
+// Set the expiration time, and the data will be cleared in the next cache cleaning cycle
 func (item *item) setExpired() {
 	item.expiration = time.Now().UnixNano() / 1e3
 }

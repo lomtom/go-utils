@@ -10,4 +10,5 @@ func TestMapCache(t *testing.T) {
 	c := cache.NewMapCache()
 	c.Set("1", 1)
 	fmt.Println(c.Get("1"))
+	fmt.Println(c.Keys())
 }

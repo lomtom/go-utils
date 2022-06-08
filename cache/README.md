@@ -11,37 +11,39 @@
 接口
 ---
 ```go
-
-// IsExpired 判断是否过期
+// IsExpired judge whether the data is expired
 IsExpired(key string) (bool, error)
-// DeleteExpired 删除过期数据项
+// DeleteExpired delete all expired data
 DeleteExpired()
 
-// StartGc 重新gc
-// 设置过期时间后，会自动开启gc，无需手动gc
+// StartGc start gc
+// After the expiration time is set, GC will be started automatically without manual GC
 StartGc() error
+// StopGc stop gc
 StopGc() error
 
-// Get 获取数据
-// 不存在或过期都会返回不存在
-// 返回数据、是否存在
+// Get data
+// When the data does not exist or expires, it will return nonexistence（false）
 Get(key string) (interface{}, bool)
-// GetAndDelete 获取数据并删除
+// GetAndDelete get data and delete by key
 GetAndDelete(key string) (interface{}, bool)
-// GetAndExpired  获取数据并过期
-// 将在下一次清除时删除，若未开启清除能力，将永远不会删除
+// GetAndExpired  get data and expire by key
+// It will be deleted at the next clearing. If the clearing capability is not enabled, it will never be deleted
 GetAndExpired(key string) (interface{}, bool)
 
-// Delete 删除数据
+// Delete delete data by key
 Delete(key string) (interface{}, bool)
 
-// Set 添加/修改数据，将会覆盖
+
+// Set  data by key，it will overwrite the data if the key exists
 Set(key string, value interface{})
-// Add 添加数据，若有相同
-// 如需覆盖添加，请使用Set方法
+// Add data，Cannot add existing data
+// To override the addition, use the set method
 Add(key string, value interface{}) error
-// Clear 清除所有数据
+// Clear remove all data
 Clear()
+// Keys get all keys
+Keys() []string
 ```
 
 使用

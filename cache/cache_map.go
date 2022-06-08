@@ -7,17 +7,15 @@ import (
 	"time"
 )
 
-/******************************************* 缓存 *******************************************/
-
 type Map struct {
-	items  map[string]item // 缓存数据项存储在 map 中
-	mu     sync.RWMutex    // 读写锁
+	items  map[string]item // Cache data items are stored in the map
+	mu     sync.RWMutex    // Read write lock
 	stopGc chan bool
 	isGc   bool
 	options
 }
 
-// NewMapCache 新建缓存
+// NewMapCache create a cache with Map
 func NewMapCache(opts ...CreateOptionFunc) MapInterface {
 	exp := newOption()
 	for _, opt := range opts {
@@ -33,7 +31,7 @@ func NewMapCache(opts ...CreateOptionFunc) MapInterface {
 	return res
 }
 
-// 过期缓存数据项清理
+// Expired cache data item cleanup
 func (c *Map) gcLoop() {
 	ticker := time.NewTicker(c.gcInterval)
 	for {
@@ -47,37 +45,37 @@ func (c *Map) gcLoop() {
 	}
 }
 
-// StopGc 停止gc
+// StopGc stop gc
 func (c *Map) StopGc() error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if !c.isGc {
-		return errors.New("GC程序已关闭")
+		return errors.New("GC is closed")
 	}
 	c.isGc = false
 	c.stopGc <- true
 	return nil
 }
 
-// StartGc 重新gc
-// 设置过期时间后，会自动开启gc，无需手动gc
+// StartGc start gc
+// After the expiration time is set, GC will be started automatically without manual GC
 func (c *Map) StartGc() error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if c.isGc {
-		return errors.New("GC程序已开启")
+		return errors.New("GC has been started")
 	}
 	c.isGc = true
 	go c.gcLoop()
 	return nil
 }
 
-// 删除缓存数据项
+// delete data by key
 func (c *Map) del(key string) {
 	delete(c.items, key)
 }
 
-// 设置缓存数据
+// set cache data by key
 func (c *Map) set(key string, value interface{}, expiration int64) {
 	c.items[key] = item{
 		value,
@@ -85,6 +83,7 @@ func (c *Map) set(key string, value interface{}, expiration int64) {
 	}
 }
 
+// get data by key
 func (c *Map) get(key string) (*item, bool) {
 	value, ok := c.items[key]
 	if !ok || value.expired() {
@@ -93,7 +92,7 @@ func (c *Map) get(key string) (*item, bool) {
 	return &value, true
 }
 
-// 生成过期时间
+// generate expiration time
 func (c *Map) generateExpiration() int64 {
 	if c.expiration == DefaultExpiration {
 		return 0
@@ -101,23 +100,23 @@ func (c *Map) generateExpiration() int64 {
 	return time.Now().Add(c.expiration).UnixNano() / 1e3
 }
 
-// 初始化数据
+// init data
 func (c *Map) judgeAndInitItem() {
 	if c.items == nil {
 		c.items = make(map[string]item)
 	}
 }
 
-// IsExpired 判断是否过期
+// IsExpired judge whether the data is expired
 func (c *Map) IsExpired(key string) (bool, error) {
 	value, ok := c.items[key]
 	if !ok {
-		return false, fmt.Errorf("该数据不存在")
+		return false, fmt.Errorf("the data %s does not exist", key)
 	}
 	return value.expired(), nil
 }
 
-// DeleteExpired 删除过期数据项
+// DeleteExpired delete all expired data
 func (c *Map) DeleteExpired() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -129,7 +128,7 @@ func (c *Map) DeleteExpired() {
 	}
 }
 
-// Delete 删除数据
+// Delete delete data by key
 func (c *Map) Delete(key string) (interface{}, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -141,7 +140,7 @@ func (c *Map) Delete(key string) (interface{}, bool) {
 	return nil, ok
 }
 
-// Set 添加/修改数据，将会覆盖
+// Set  data by key，it will overwrite the data if the key exists
 func (c *Map) Set(key string, value interface{}) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -150,23 +149,22 @@ func (c *Map) Set(key string, value interface{}) {
 	c.set(key, value, c.generateExpiration())
 }
 
-// Add 添加数据，若有相同
-// 如需覆盖添加，请使用Set方法
+// Add data，Cannot add existing data
+// To override the addition, use the set method
 func (c *Map) Add(key string, value interface{}) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.judgeAndInitItem()
 	if _, ok := c.items[key]; ok {
-		return fmt.Errorf("数据 %s 已存在", key)
+		return fmt.Errorf("data %s already exists", key)
 	}
 
 	c.set(key, value, c.generateExpiration())
 	return nil
 }
 
-// Get 获取数据
-// 不存在或过期都会返回不存在
-// 返回数据、是否存在
+// Get  data
+// When the data does not exist or expires, it will return nonexistence（false）
 func (c *Map) Get(key string) (interface{}, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -177,7 +175,7 @@ func (c *Map) Get(key string) (interface{}, bool) {
 	return value.object, true
 }
 
-// GetAndDelete 获取数据并删除
+// GetAndDelete get data and delete by key
 func (c *Map) GetAndDelete(key string) (interface{}, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -185,13 +183,13 @@ func (c *Map) GetAndDelete(key string) (interface{}, bool) {
 	if !ok || value.expired() {
 		return nil, false
 	}
-	// 删除
+	// delete
 	c.del(key)
 	return value.object, true
 }
 
-// GetAndExpired  获取数据并过期
-// 将在下一次清除时删除，若未开启清除能力，将永远不会删除
+// GetAndExpired  get data and expire by key
+// It will be deleted at the next clearing. If the clearing capability is not enabled, it will never be deleted
 func (c *Map) GetAndExpired(key string) (interface{}, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -199,12 +197,21 @@ func (c *Map) GetAndExpired(key string) (interface{}, bool) {
 	if !ok || value.expired() {
 		return nil, false
 	}
-	// 过期
+	// Set expiration
 	c.set(key, value, time.Now().UnixNano()/1e3)
 	return value.object, true
 }
 
-// Clear 清除所有数据
+// Clear remove all data
 func (c *Map) Clear() {
 	c.items = make(map[string]item)
+}
+
+// Keys get all keys
+func (c *Map) Keys() []string {
+	res := make([]string, 0)
+	for k, _ := range c.items {
+		res = append(res, k)
+	}
+	return res
 }
