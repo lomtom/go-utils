@@ -10,23 +10,21 @@ import (
 /******************************************* 缓存 *******************************************/
 
 type Map struct {
-	items      map[string]item // 缓存数据项存储在 map 中
-	expiration time.Duration   // 过期时间
-	mu         sync.RWMutex    // 读写锁
-	gcInterval time.Duration   // 过期数据项清理周期
-	stopGc     chan bool
-	isGc       bool
+	items  map[string]item // 缓存数据项存储在 map 中
+	mu     sync.RWMutex    // 读写锁
+	stopGc chan bool
+	isGc   bool
+	options
 }
 
 // NewMapCache 新建缓存
 func NewMapCache(opts ...CreateOptionFunc) MapInterface {
-	exp := newExpirationPolicy()
+	exp := newOption()
 	for _, opt := range opts {
 		opt(&exp)
 	}
 	res := &Map{
-		expiration: exp.expiration,
-		gcInterval: exp.gcInterval,
+		options: exp,
 	}
 	if exp.expiration != DefaultExpiration {
 		// 开启gc

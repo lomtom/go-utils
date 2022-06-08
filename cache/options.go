@@ -12,25 +12,25 @@ const (
 	DefaultInterval = time.Minute
 )
 
-type expirationPolicy struct {
+type options struct {
 	expiration time.Duration // 过期时间
 	gcInterval time.Duration // 过期数据项清理周期
 }
 
-func newExpirationPolicy() expirationPolicy {
-	return expirationPolicy{
+func newOption() options {
+	return options{
 		expiration: DefaultExpiration,
 		gcInterval: DefaultInterval,
 	}
 }
 
 // CreateOptionFunc 初始化可选参数（定义过期策略）
-type CreateOptionFunc func(o *expirationPolicy)
+type CreateOptionFunc func(o *options)
 
 // SetExpirationTime  设置过期时间
 // expiration 过期时间
 func SetExpirationTime(expiration time.Duration) CreateOptionFunc {
-	return func(o *expirationPolicy) {
+	return func(o *options) {
 		o.expiration = expiration
 	}
 }
@@ -41,7 +41,7 @@ func SetGcInterval(gcInterval time.Duration) CreateOptionFunc {
 	if gcInterval == 0 {
 		gcInterval = time.Minute
 	}
-	return func(o *expirationPolicy) {
+	return func(o *options) {
 		o.gcInterval = gcInterval
 	}
 }
