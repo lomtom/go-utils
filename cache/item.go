@@ -1,21 +1,23 @@
 package cache
 
-import "time"
+import (
+	"time"
+)
 
-type item struct {
-	object     interface{} // data
-	expiration int64       // expiration time
+type Item struct {
+	Object     interface{} // data
+	Expiration int64       // expiration time
 }
 
 // judge whether data is expired
-func (item *item) expired() bool {
-	if item.expiration == 0 {
+func (item *Item) expired() bool {
+	if item.Expiration == 0 {
 		return false
 	}
-	return time.Now().UnixNano()/1e3 > item.expiration
+	return time.Now().UnixNano()/1e3 > item.Expiration
 }
 
 // Set the expiration time, and the data will be cleared in the next cache cleaning cycle
-func (item *item) setExpired() {
-	item.expiration = time.Now().UnixNano() / 1e3
+func (item *Item) setExpired() {
+	item.Expiration = time.Now().UnixNano() / 1e3
 }

@@ -5,7 +5,7 @@
 - 提供间隔时间对数据进行过期清理
 - 可手动开启/停止清理能力
 - 可手动清除全部缓存
-- 缓存持久化（计划中）
+- 缓存持久化
 - ...
 
 接口
@@ -46,6 +46,25 @@ Clear()
 Keys() []string
 ```
 
+初始化可选项
+---
+```go
+// 设置过期时间
+SetExpirationTime(expiration time.Duration)
+
+// 设置gc时间间隔
+SetGcInterval(gcInterval time.Duration)
+
+// 开启持久化（需要指定持久化文件名前缀）
+SetEnablePersistence(name string)
+
+// 设置持久化策略（目前只支持一种FFB：全量保存）
+SetPersistencePolicy(policy Persistence)
+
+// 设置持久化文件保存路径（）
+SetPersistencePath(path string)
+```
+
 使用
 ---
 **引用**
@@ -56,7 +75,11 @@ import "github.com/lomtom/go-utils/cache"
 **示例**
 ```go
 func Test(t *testing.T) {{
-    c := cache.NewMapCache()
+    c,err := cache.NewMapCache()
+    if err != nil {
+        fmt.Println("err:", err)
+        return
+    }
     c.Set("1", 1)
     fmt.Println(c.Get("1"))
 }

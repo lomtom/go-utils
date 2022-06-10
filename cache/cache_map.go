@@ -8,15 +8,15 @@ import (
 )
 
 type Map struct {
-	items  map[string]item // Cache data items are stored in the map
-	mu     sync.RWMutex    // Read write lock
+	items  map[string]*Item // Cache data items are stored in the map
+	mu     sync.RWMutex     // Read write lock
 	stopGc chan bool
 	isGc   bool
 	options
 }
 
 // NewMapCache create a cache with Map
-func NewMapCache(opts ...CreateOptionFunc) MapInterface {
+func NewMapCache(opts ...CreateOptionFunc) (MapInterface, error) {
 	exp := newOption()
 	for _, opt := range opts {
 		opt(&exp)
@@ -25,13 +25,20 @@ func NewMapCache(opts ...CreateOptionFunc) MapInterface {
 		options: exp,
 	}
 	if exp.expiration != DefaultExpiration {
-		// 开启gc
+		// start gc
 		_ = res.StartGc()
 	}
-	return res
+	if exp.enablePersistence {
+		res.items = make(map[string]*Item)
+		err := res.startPersistence(&(res.items))
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
 }
 
-// Expired cache data item cleanup
+// Expired cache data Item cleanup
 func (c *Map) gcLoop() {
 	ticker := time.NewTicker(c.gcInterval)
 	for {
@@ -77,19 +84,19 @@ func (c *Map) del(key string) {
 
 // set cache data by key
 func (c *Map) set(key string, value interface{}, expiration int64) {
-	c.items[key] = item{
+	c.items[key] = &Item{
 		value,
 		expiration,
 	}
 }
 
 // get data by key
-func (c *Map) get(key string) (*item, bool) {
+func (c *Map) get(key string) (*Item, bool) {
 	value, ok := c.items[key]
 	if !ok || value.expired() {
 		return nil, false
 	}
-	return &value, true
+	return value, true
 }
 
 // generate expiration time
@@ -103,7 +110,7 @@ func (c *Map) generateExpiration() int64 {
 // init data
 func (c *Map) judgeAndInitItem() {
 	if c.items == nil {
-		c.items = make(map[string]item)
+		c.items = make(map[string]*Item)
 	}
 }
 
@@ -135,7 +142,7 @@ func (c *Map) Delete(key string) (interface{}, bool) {
 	value, ok := c.get(key)
 	if ok {
 		c.del(key)
-		return value.object, ok
+		return value.Object, ok
 	}
 	return nil, ok
 }
@@ -172,7 +179,7 @@ func (c *Map) Get(key string) (interface{}, bool) {
 	if !ok || value.expired() {
 		return nil, false
 	}
-	return value.object, true
+	return value.Object, true
 }
 
 // GetAndDelete get data and delete by key
@@ -185,7 +192,7 @@ func (c *Map) GetAndDelete(key string) (interface{}, bool) {
 	}
 	// delete
 	c.del(key)
-	return value.object, true
+	return value.Object, true
 }
 
 // GetAndExpired  get data and expire by key
@@ -197,14 +204,14 @@ func (c *Map) GetAndExpired(key string) (interface{}, bool) {
 	if !ok || value.expired() {
 		return nil, false
 	}
-	// Set expiration
+	// Set now as expiration time
 	c.set(key, value, time.Now().UnixNano()/1e3)
-	return value.object, true
+	return value.Object, true
 }
 
 // Clear remove all data
 func (c *Map) Clear() {
-	c.items = make(map[string]item)
+	c.items = make(map[string]*Item)
 }
 
 // Keys get all keys
