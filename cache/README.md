@@ -61,7 +61,7 @@ SetEnablePersistence(name string)
 // 设置持久化策略（目前只支持一种FFB：全量保存）
 SetPersistencePolicy(policy Persistence)
 
-// 设置持久化文件保存路径（）
+// 设置持久化文件保存路径
 SetPersistencePath(path string)
 ```
 

@@ -1,9 +1,8 @@
 package cache
 
 import (
-	"encoding/json"
+	"encoding/gob"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
@@ -41,14 +40,16 @@ func (persistence *persistenceOption) read(data interface{}) error {
 	if err != nil {
 		return nil
 	}
-	fileData, err := os.ReadFile(file)
+	fileData, err := os.OpenFile(file, os.O_RDWR, os.ModePerm)
 	if err != nil {
 		return err
 	}
-	if len(fileData) == 0 {
-		return nil
+	decoder := gob.NewDecoder(fileData)
+	err = decoder.Decode(data)
+	if err != nil {
+		return err
 	}
-	return json.Unmarshal(fileData, data)
+	return nil
 }
 
 // If an error occurs, it fails the backup
@@ -59,18 +60,23 @@ func (persistence *persistenceOption) backup(data interface{}) {
 	for {
 		select {
 		case <-ticker.C:
-			backupData, err := json.Marshal(data)
+			err := judgeAndCreate(file)
 			if err != nil {
 				continue
 			}
-			err = judgeAndCreate(file)
-			if err != nil {
-				continue
-			}
-			err = ioutil.WriteFile(file, backupData, 0755)
-			if err != nil {
-				continue
-			}
+			func() {
+				f, err := os.OpenFile(file, os.O_RDWR, os.ModePerm)
+				if err != nil {
+					return
+				}
+				defer f.Close()
+				encoder := gob.NewEncoder(f)
+				err = encoder.Encode(data)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+			}()
 		}
 	}
 }
