@@ -6,7 +6,7 @@ go工具包 ⚗️
 安装 ⚒️
 ---
 ```shell
-go get github.com/lomtom/go-utils
+go get github.com/lomtom/go-utils/v2
 ```
 
 使用 
@@ -17,4 +17,4 @@ go get github.com/lomtom/go-utils
 
 注意 ⚠️ 
 ---
-1. 由于使用Go 1.16 开发的工具包，低版本可能不兼容
+1. 由于v2使用Go 1.18 开发的工具包，低版本将不兼容
