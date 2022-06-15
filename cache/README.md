@@ -67,11 +67,6 @@ SetPersistencePath(path string)
 
 使用
 ---
-**引用**
-```go
-import "github.com/lomtom/go-utils/cache"
-```
-
 **示例**
 ```go
 func Test(t *testing.T) {{

@@ -54,11 +54,6 @@ Remove(j TimerJobInterface) error
 
 使用
 ---
-**引用**
-```go
-import "github.com/lomtom/go-utils/job"
-```
-
 **示例**
 
 示例一：使用定时任务
