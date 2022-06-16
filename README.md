@@ -18,4 +18,4 @@ go get github.com/lomtom/go-utils/v2
 注意 ⚠️ 
 ---
 1. 由于v2使用Go 1.18 开发的工具包，低版本将不兼容
-2. 如果是低版本请查看[master](/github.com/lomtom/go-utils/tree/master)
+2. 如果是低版本请查看[master](https://github.com/lomtom/go-utils/tree/master)
