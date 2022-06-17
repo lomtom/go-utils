@@ -13,19 +13,19 @@ const (
 	Desc
 )
 
-type Predicate[T any] func(value T) bool
+type Predicate[E any] func(value E) bool
 
-type UnaryOperator[T any] func(value T) T
+type UnaryOperator[E any] func(value E) E
 
-type Comparator[T any] func(value1 T, value2 T) bool
+type Comparator[E any] func(value1 E, value2 E) bool
 
 // AddAll add all elements of values to slice
-func AddAll[T any](slice []T, values ...T) []T {
+func AddAll[E any](slice []E, values ...E) []E {
 	return append(slice, values...)
 }
 
 // Contains judge whether slice contain value
-func Contains[T any](slice []T, value T) bool {
+func Contains[E any](slice []E, value E) bool {
 	for _, v := range slice {
 		if reflect.DeepEqual(v, value) {
 			return true
@@ -36,7 +36,7 @@ func Contains[T any](slice []T, value T) bool {
 
 // ContainsAll judge whether slice contain all of values
 // If one of values does not contain, false will be returned
-func ContainsAll[T any](slice []T, values ...T) bool {
+func ContainsAll[E any](slice []E, values ...E) bool {
 	for _, value := range values {
 		if !Contains(slice, value) {
 			return false
@@ -46,7 +46,7 @@ func ContainsAll[T any](slice []T, values ...T) bool {
 }
 
 // DeleteAt delete elements of slice from from index to to - 1 index
-func DeleteAt[T any](slice []T, from int, to ...int) []T {
+func DeleteAt[E any](slice []E, from int, to ...int) []E {
 	size := len(slice)
 	if from < 0 || from >= size {
 		return slice
@@ -67,11 +67,11 @@ func DeleteAt[T any](slice []T, from int, to ...int) []T {
 }
 
 // Distinct return the distinct elements of slice
-func Distinct[T any](slice []T) []T {
+func Distinct[E any](slice []E) []E {
 	if len(slice) == 0 {
-		return []T{}
+		return []E{}
 	}
-	var result []T
+	var result []E
 	// bubble sort
 	for i := 0; i < len(slice); i++ {
 		value := slice[i]
@@ -90,11 +90,11 @@ func Distinct[T any](slice []T) []T {
 }
 
 // Filter it will filter elements of slice by predicate func
-func Filter[T any](slice []T, predicate Predicate[T]) []T {
+func Filter[E any](slice []E, predicate Predicate[E]) []E {
 	if predicate == nil {
 		return slice
 	}
-	result := make([]T, 0, 0)
+	result := make([]E, 0, 0)
 	for _, value := range slice {
 		b := predicate(value)
 		if b {
@@ -105,7 +105,7 @@ func Filter[T any](slice []T, predicate Predicate[T]) []T {
 }
 
 // InsertAt it will insert elem from values in index
-func InsertAt[T any](slice []T, index int, values ...T) []T {
+func InsertAt[E any](slice []E, index int, values ...E) []E {
 	size := len(slice)
 	if index < 0 || index > size {
 		return slice
@@ -115,14 +115,14 @@ func InsertAt[T any](slice []T, index int, values ...T) []T {
 }
 
 // IsEmpty judge whether the slice is empty
-func IsEmpty[T any](slice []T) bool {
+func IsEmpty[E any](slice []E) bool {
 	return len(slice) == 0
 }
 
 // RemoveAll remove elements from slice
 // 1,2,3  2,3 -> 1
-func RemoveAll[T any](slice []T, values ...T) []T {
-	result := make([]T, 0)
+func RemoveAll[E any](slice []E, values ...E) []E {
+	result := make([]E, 0)
 
 	for _, value := range slice {
 		if !Contains(values, value) {
@@ -133,7 +133,7 @@ func RemoveAll[T any](slice []T, values ...T) []T {
 }
 
 // ReplaceAll replace elements from slice by operator func
-func ReplaceAll[T any](slice []T, operator UnaryOperator[T]) []T {
+func ReplaceAll[E any](slice []E, operator UnaryOperator[E]) []E {
 	for index, value := range slice {
 		slice[index] = operator(value)
 	}
@@ -142,8 +142,8 @@ func ReplaceAll[T any](slice []T, operator UnaryOperator[T]) []T {
 
 // RetainAll
 // 1,2,3   2,3,4  -> 2,3
-func RetainAll[T any](slice []T, values ...T) []T {
-	result := make([]T, 0)
+func RetainAll[E any](slice []E, values ...E) []E {
+	result := make([]E, 0)
 
 	for _, value := range slice {
 		if Contains(values, value) {
@@ -153,19 +153,19 @@ func RetainAll[T any](slice []T, values ...T) []T {
 	return result
 }
 
-func Size[T any](slice []T) int {
+func Size[E any](slice []E) int {
 	return len(slice)
 }
 
 // Sort It will be sorted by comparator
-func Sort[T any](slice []T, comparator Comparator[T]) {
+func Sort[E any](slice []E, comparator Comparator[E]) {
 	sort.Slice(slice, func(index1, index2 int) bool {
 		return comparator(slice[index1], slice[index2])
 	})
 }
 
 // SortByField It will be sorted by field,default asc
-func SortByField[T any](slice []T, field string, sortType ...Collation) error {
+func SortByField[E any](slice []E, field string, sortType ...Collation) error {
 	sv := reflect.ValueOf(slice)
 	t := sv.Type().Elem()
 	// Find the field.
