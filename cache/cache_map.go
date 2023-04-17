@@ -7,21 +7,21 @@ import (
 	"time"
 )
 
-type Map struct {
-	items  map[string]*Item // Cache data items are stored in the map
-	mu     sync.RWMutex     // Read write lock
+type Map[E any] struct {
+	items  map[string]*Item[E] // Cache data items are stored in the map
+	mu     sync.RWMutex        // Read write lock
 	stopGc chan bool
 	isGc   bool
 	options
 }
 
 // NewMapCache create a cache with Map
-func NewMapCache(opts ...CreateOptionFunc) (MapInterface, error) {
+func NewMapCache[E any](opts ...CreateOptionFunc) (MapInterface[E], error) {
 	exp := newOption()
 	for _, opt := range opts {
 		opt(&exp)
 	}
-	res := &Map{
+	res := &Map[E]{
 		options: exp,
 	}
 	if exp.expiration != DefaultExpiration {
@@ -29,7 +29,7 @@ func NewMapCache(opts ...CreateOptionFunc) (MapInterface, error) {
 		_ = res.StartGc()
 	}
 	if exp.enablePersistence {
-		res.items = make(map[string]*Item)
+		res.items = make(map[string]*Item[E])
 		err := res.startPersistence(&(res.items))
 		if err != nil {
 			return nil, err
@@ -39,7 +39,7 @@ func NewMapCache(opts ...CreateOptionFunc) (MapInterface, error) {
 }
 
 // Expired cache data Item cleanup
-func (c *Map) gcLoop() {
+func (c *Map[E]) gcLoop() {
 	ticker := time.NewTicker(c.gcInterval)
 	for {
 		select {
@@ -53,7 +53,7 @@ func (c *Map) gcLoop() {
 }
 
 // StopGc stop gc
-func (c *Map) StopGc() error {
+func (c *Map[E]) StopGc() error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if !c.isGc {
@@ -66,7 +66,7 @@ func (c *Map) StopGc() error {
 
 // StartGc start gc
 // After the expiration time is set, GC will be started automatically without manual GC
-func (c *Map) StartGc() error {
+func (c *Map[E]) StartGc() error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if c.isGc {
@@ -78,20 +78,20 @@ func (c *Map) StartGc() error {
 }
 
 // delete data by key
-func (c *Map) del(key string) {
+func (c *Map[E]) del(key string) {
 	delete(c.items, key)
 }
 
 // set cache data by key
-func (c *Map) set(key string, value interface{}, expiration int64) {
-	c.items[key] = &Item{
-		value,
-		expiration,
+func (c *Map[E]) set(key string, value E, expiration int64) {
+	c.items[key] = &Item[E]{
+		Object:     value,
+		Expiration: expiration,
 	}
 }
 
 // get data by key
-func (c *Map) get(key string) (*Item, bool) {
+func (c *Map[E]) get(key string) (*Item[E], bool) {
 	value, ok := c.items[key]
 	if !ok || value.expired() {
 		return nil, false
@@ -100,7 +100,7 @@ func (c *Map) get(key string) (*Item, bool) {
 }
 
 // generate expiration time
-func (c *Map) generateExpiration() int64 {
+func (c *Map[E]) generateExpiration() int64 {
 	if c.expiration == DefaultExpiration {
 		return 0
 	}
@@ -108,14 +108,14 @@ func (c *Map) generateExpiration() int64 {
 }
 
 // init data
-func (c *Map) judgeAndInitItem() {
+func (c *Map[E]) judgeAndInitItem() {
 	if c.items == nil {
-		c.items = make(map[string]*Item)
+		c.items = make(map[string]*Item[E])
 	}
 }
 
 // IsExpired judge whether the data is expired
-func (c *Map) IsExpired(key string) (bool, error) {
+func (c *Map[E]) IsExpired(key string) (bool, error) {
 	value, ok := c.items[key]
 	if !ok {
 		return false, fmt.Errorf("the data %s does not exist", key)
@@ -124,7 +124,7 @@ func (c *Map) IsExpired(key string) (bool, error) {
 }
 
 // DeleteExpired delete all expired data
-func (c *Map) DeleteExpired() {
+func (c *Map[E]) DeleteExpired() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -136,7 +136,7 @@ func (c *Map) DeleteExpired() {
 }
 
 // Delete delete data by key
-func (c *Map) Delete(key string) (interface{}, bool) {
+func (c *Map[E]) Delete(key string) (E, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	value, ok := c.get(key)
@@ -144,11 +144,12 @@ func (c *Map) Delete(key string) (interface{}, bool) {
 		c.del(key)
 		return value.Object, ok
 	}
-	return nil, ok
+	var zero E
+	return zero, ok
 }
 
 // Set  data by key，it will overwrite the data if the key exists
-func (c *Map) Set(key string, value interface{}) {
+func (c *Map[E]) Set(key string, value E) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.judgeAndInitItem()
@@ -158,7 +159,7 @@ func (c *Map) Set(key string, value interface{}) {
 
 // Add data，Cannot add existing data
 // To override the addition, use the set method
-func (c *Map) Add(key string, value interface{}) error {
+func (c *Map[E]) Add(key string, value E) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.judgeAndInitItem()
@@ -172,23 +173,25 @@ func (c *Map) Add(key string, value interface{}) error {
 
 // Get  data
 // When the data does not exist or expires, it will return nonexistence（false）
-func (c *Map) Get(key string) (interface{}, bool) {
+func (c *Map[E]) Get(key string) (E, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	value, ok := c.items[key]
 	if !ok || value.expired() {
-		return nil, false
+		var zero E
+		return zero, false
 	}
 	return value.Object, true
 }
 
 // GetAndDelete get data and delete by key
-func (c *Map) GetAndDelete(key string) (interface{}, bool) {
+func (c *Map[E]) GetAndDelete(key string) (E, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	value, ok := c.items[key]
 	if !ok || value.expired() {
-		return nil, false
+		var zero E
+		return zero, false
 	}
 	// delete
 	c.del(key)
@@ -197,27 +200,28 @@ func (c *Map) GetAndDelete(key string) (interface{}, bool) {
 
 // GetAndExpired  get data and expire by key
 // It will be deleted at the next clearing. If the clearing capability is not enabled, it will never be deleted
-func (c *Map) GetAndExpired(key string) (interface{}, bool) {
+func (c *Map[E]) GetAndExpired(key string) (E, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	value, ok := c.items[key]
 	if !ok || value.expired() {
-		return nil, false
+		var zero E
+		return zero, false
 	}
 	// Set now as expiration time
-	c.set(key, value, time.Now().UnixNano()/1e3)
+	c.set(key, value.Object, time.Now().UnixNano()/1e3)
 	return value.Object, true
 }
 
 // Clear remove all data
-func (c *Map) Clear() {
-	c.items = make(map[string]*Item)
+func (c *Map[E]) Clear() {
+	c.items = make(map[string]*Item[E])
 }
 
 // Keys get all keys
-func (c *Map) Keys() []string {
+func (c *Map[E]) Keys() []string {
 	res := make([]string, 0)
-	for k, _ := range c.items {
+	for k := range c.items {
 		res = append(res, k)
 	}
 	return res

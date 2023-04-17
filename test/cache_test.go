@@ -8,7 +8,7 @@ import (
 )
 
 func TestBackup(t *testing.T) {
-	c, err := cache.NewMapCache(cache.SetExpirationTime(time.Minute), cache.SetGcInterval(time.Second*10), cache.SetEnablePersistence("test"), cache.SetPersistencePath("/tmp/cache/persistence"))
+	c, err := cache.NewMapCache[int](cache.SetExpirationTime(time.Minute), cache.SetGcInterval(time.Second*10), cache.SetEnablePersistence("test"), cache.SetPersistencePath("/tmp/cache/persistence"))
 	if err != nil {
 		fmt.Println("err:", err)
 		return
