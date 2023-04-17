@@ -17,7 +17,7 @@ func (item *Item[E]) expired() bool {
 	return time.Now().UnixNano()/1e3 > item.Expiration
 }
 
-// Set the expiration time, and the data will be cleared in the next cache cleaning cycle
+// SetDefault the expiration time, and the data will be cleared in the next cache cleaning cycle
 func (item *Item[E]) setExpired() {
 	item.Expiration = time.Now().UnixNano() / 1e3
 }

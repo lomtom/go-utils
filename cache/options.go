@@ -68,7 +68,7 @@ func SetGcInterval(gcInterval time.Duration) CreateOptionFunc {
 	}
 }
 
-// SetEnablePersistence Set whether to enable persistencePolicy
+// SetEnablePersistence SetDefault whether to enable persistencePolicy
 func SetEnablePersistence(name string) CreateOptionFunc {
 	return func(o *options) {
 		o.enablePersistence = true

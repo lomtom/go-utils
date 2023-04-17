@@ -107,6 +107,11 @@ func (c *Map[E]) generateExpiration() int64 {
 	return time.Now().Add(c.expiration).UnixNano() / 1e3
 }
 
+// generate expiration time
+func (c *Map[E]) generateExpirationForItem(expiration time.Duration) int64 {
+	return time.Now().Add(expiration).UnixNano() / 1e3
+}
+
 // init data
 func (c *Map[E]) judgeAndInitItem() {
 	if c.items == nil {
@@ -155,6 +160,15 @@ func (c *Map[E]) Set(key string, value E) {
 	c.judgeAndInitItem()
 
 	c.set(key, value, c.generateExpiration())
+}
+
+// SetDefault  data by key，it will overwrite the data if the key exists
+func (c *Map[E]) SetDefault(key string, value E, expiration time.Duration) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.judgeAndInitItem()
+
+	c.set(key, value, c.generateExpirationForItem(expiration))
 }
 
 // Add data，Cannot add existing data
@@ -208,9 +222,20 @@ func (c *Map[E]) GetAndExpired(key string) (E, bool) {
 		var zero E
 		return zero, false
 	}
-	// Set now as expiration time
+	// SetDefault now as expiration time
 	c.set(key, value.Object, time.Now().UnixNano()/1e3)
 	return value.Object, true
+}
+
+func (c *Map[E]) GetWithExpiration(key string) (E, time.Time, bool) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	value, ok := c.items[key]
+	if !ok || value.expired() {
+		var zero E
+		return zero, time.Time{}, false
+	}
+	return value.Object, time.UnixMicro(value.Expiration), true
 }
 
 // Clear remove all data

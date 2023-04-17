@@ -13,10 +13,16 @@ func TestBackup(t *testing.T) {
 		fmt.Println("err:", err)
 		return
 	}
-	c.Set("3", 1)
-	time.Sleep(time.Second * 5)
-	c.Set("2", 4)
-	time.Sleep(time.Second * 5)
-	fmt.Println(c.Get("1"))
-	time.Sleep(time.Second * 5)
+	c.SetDefault("3", 3, time.Hour*2)
+	c.Set("4", 4)
+	go func() {
+		for {
+			time.Sleep(time.Second * 1)
+			fmt.Println(c.GetWithExpiration("3"))
+			fmt.Println(c.GetWithExpiration("4"))
+		}
+	}()
+	fmt.Println(c.Get("3"))
+	time.Sleep(time.Second * 3)
+	fmt.Println(c.Get("3"))
 }
