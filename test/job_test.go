@@ -2,7 +2,7 @@ package test
 
 import (
 	"fmt"
-	"github.com/lomtom/go-utils/v2/job"
+	"github.com/lomtom/go-utils/job"
 	"testing"
 	"time"
 )

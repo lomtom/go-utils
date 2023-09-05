@@ -1,3 +1,3 @@
-module github.com/lomtom/go-utils/v2
+module github.com/lomtom/go-utils
 
 go 1.18
