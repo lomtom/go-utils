@@ -16,7 +16,6 @@ type pool struct {
 
 // NewPool 放入的任务将不会自动开启需手动开启
 func NewPool(jobs ...TimerJobInterface) (PoolInterface, error) {
-	var l sync.Mutex
 	jobsMap := make(map[string]TimerJobInterface)
 	if len(jobs) != 0 {
 		for _, j := range jobs {
@@ -28,7 +27,7 @@ func NewPool(jobs ...TimerJobInterface) (PoolInterface, error) {
 	}
 	return &pool{
 		jobs: jobsMap,
-		lock: l,
+		lock: sync.Mutex{},
 	}, nil
 }
 
